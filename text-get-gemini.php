@@ -6,11 +6,12 @@
 
 // Configuration
 $apiKey = 'AIzaSyCExc18KwbZa2_AV3X_25nN095P4S50n2U';
-$model = 'gemini-1.5-flash';
+$model = 'gemini-2.5-flash';
 $question = 'How is the weather today?';
 
 // API endpoint
 $url = "https://generativelanguage.googleapis.com/v1/models/{$model}:generateContent?key={$apiKey}";
+
 // Prepare the request payload
 $payload = [
     'contents' => [
@@ -83,4 +84,3 @@ $fullResponse = $responseData;
 echo str_repeat('-', 50) . "\n";
 echo "Done!\n";
 ?>
-
