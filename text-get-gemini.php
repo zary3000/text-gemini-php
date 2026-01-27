@@ -5,7 +5,7 @@
  */
 
 // Configuration
-$apiKey = 'AIzaSyCExc18KwbZa2_AV3X_25nN095P4S50n2U';
+$apiKey = 'YOUR_GEMINI_API_KEY_example_AIzaSyCExc18KwbZa2_AV3X_25nN095P4S50n2U';
 $model = 'gemini-2.5-flash';
 $question = 'How is the weather today?';
 
@@ -84,3 +84,4 @@ $fullResponse = $responseData;
 echo str_repeat('-', 50) . "\n";
 echo "Done!\n";
 ?>
+
