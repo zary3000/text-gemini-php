@@ -1,16 +1,18 @@
 <?php
-header('Content-Type: text/html; charset=utf-8');
+/**
+ * Gemini API Weather Query Script
+ * Sends a question to Google's Gemini API and prints the response
+ */
 
-// === CONFIGURATION ===
-$apiKey = 'AIzaSyCExc18KwbZa2_AV3X_25nN095P4S50n2U';          // ← Replace with your real key
-$model  = 'gemini-1.5-flash';                  // or gemini-1.5-pro, gemini-2.0-flash etc.
+// Configuration
+$apiKey = 'AIzaSyCExc18KwbZa2_AV3X_25nN095P4S50n2U';
+$model = 'gemini-1.5-flash';
+$question = 'How is the weather today?';
 
-// Get your key → https://aistudio.google.com/app/apikey
+// API endpoint
+$url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
 
-// Question we always ask (you can make it dynamic later)
-$question = "How is the weather today in Luxembourg? Answer concisely in one sentence.";
-
-// === Prepare the payload for Gemini API ===
+// Prepare the request payload
 $payload = [
     'contents' => [
         [
@@ -21,99 +23,64 @@ $payload = [
     ]
 ];
 
-$jsonPayload = json_encode($payload);
-
-// === API endpoint ===
-$url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
-
-// === Make the cURL request ===
+// Initialize cURL
 $ch = curl_init($url);
+
+// Set cURL options
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonPayload);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'Content-Type: application/json'
 ]);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 
-// Optional: increase timeout if needed
-curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+// Execute the request
+echo "Sending request to Gemini API...\n";
+echo "Question: {$question}\n";
+echo str_repeat('-', 50) . "\n";
 
 $response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
+// Check for cURL errors
 if (curl_errno($ch)) {
-    $error = curl_error($ch);
+    echo "cURL Error: " . curl_error($ch) . "\n";
     curl_close($ch);
-    die("cURL error: $error");
+    exit(1);
 }
 
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
-// === Handle response ===
+// Check HTTP response code
 if ($httpCode !== 200) {
-    http_response_code($httpCode);
-    echo "<h2>Error from Gemini API (HTTP $httpCode)</h2>";
-    echo "<pre>";
-    var_dump($response);
-    echo "</pre>";
-    exit;
+    echo "API Error (HTTP {$httpCode}):\n";
+    echo $response . "\n";
+    exit(1);
 }
 
-$data = json_decode($response, true);
+// Parse the response
+$responseData = json_decode($response, true);
 
-// Extract the generated text (path can slightly change between models/versions)
-$answer = $data['candidates'][0]['content']['parts'][0]['text'] ?? 'No answer received';
+if (json_last_error() !== JSON_ERROR_NONE) {
+    echo "JSON Parse Error: " . json_last_error_msg() . "\n";
+    echo "Raw Response: " . $response . "\n";
+    exit(1);
+}
 
-$cleanAnswer = trim($answer);
-
-// === Display result ===
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Weather Answer</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 1rem; line-height: 1.6; }
-        h1   { color: #1a73e8; }
-        .answer { background: #f8f9fa; border-left: 5px solid #1a73e8; padding: 1rem; margin: 1.5rem 0; white-space: pre-wrap; }
-        .info  { color: #555; font-size: 0.9rem; }
-    </style>
-</head>
-<body>
-
-<h1>Asked Gemini: "How is the weather today?"</h1>
-
-<div class="answer">
-<strong>Gemini answer:</strong><br><br>
-<?= htmlspecialchars($cleanAnswer) ?>
-</div>
-
-<p class="info">
-    Asked on: <?= date('Y-m-d H:i:s T') ?><br>
-    Model used: <?= htmlspecialchars($model) ?>
-</p>
-
-<?php
-// === Store the answer in a file (append mode) ===
-$logFile = 'gemini_weather_answer.txt';
-$logLine = sprintf(
-    "[%s] Question: %s\nAnswer: %s\n----------------------------------------\n",
-    date('Y-m-d H:i:s'),
-    $question,
-    $cleanAnswer
-);
-
-file_put_contents($logFile, $logLine, FILE_APPEND | LOCK_EX);
-
-if (file_exists($logFile)) {
-    echo "<p class='info'>Answer also saved to: <code>$logFile</code> (visible if server allows directory listing or you download it)</p>";
+// Extract and display the text response
+if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
+    $answer = $responseData['candidates'][0]['content']['parts'][0]['text'];
+    echo "Gemini Response:\n";
+    echo str_repeat('-', 50) . "\n";
+    echo $answer . "\n";
 } else {
-    echo "<p class='info' style='color:red;'>Could not write to log file (check folder permissions).</p>";
+    echo "Unexpected response structure:\n";
+    echo json_encode($responseData, JSON_PRETTY_PRINT) . "\n";
 }
+
+// Store the full response in a variable for potential further use
+$fullResponse = $responseData;
+
+echo str_repeat('-', 50) . "\n";
+echo "Done!\n";
 ?>
-
-</body>
-
-</html>
