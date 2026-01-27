@@ -2,7 +2,7 @@
 header('Content-Type: text/html; charset=utf-8');
 
 // === CONFIGURATION ===
-$apiKey = 'YOUR_GEMINI_API_KEY_HERE';          // ← Replace with your real key
+$apiKey = 'AIzaSyCExc18KwbZa2_AV3X_25nN095P4S50n2U';          // ← Replace with your real key
 $model  = 'gemini-1.5-flash';                  // or gemini-1.5-pro, gemini-2.0-flash etc.
 
 // Get your key → https://aistudio.google.com/app/apikey
@@ -115,4 +115,5 @@ if (file_exists($logFile)) {
 ?>
 
 </body>
+
 </html>
