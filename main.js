@@ -102,9 +102,9 @@ function createChatWindow() {
     const { width, height } = primaryDisplay.workAreaSize;
 
     chatWindow = new BrowserWindow({
-        width: 400,
-        height: 650, // Increased from 600 to give more space for input area
-        x: width - 420, // Position 20px from right edge
+        width: 450,
+        height: 600, // Increased from 600 to give more space for input area
+        x: width - 450, // Position from right edge
         y: 20, // Position 20px from top
         frame: true,
         resizable: true,
