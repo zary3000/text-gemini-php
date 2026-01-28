@@ -7,37 +7,29 @@
             padding: 0;
             overflow: hidden;
             background: transparent;
-        }
-        .drag-area {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            -webkit-app-region: drag;
+            width: 50px;
+            height: 50px;
         }
         .icon-container {
-            width: 100px;
-            height: 100px;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: transparent;
-            cursor: pointer;
+            cursor: move;
             position: relative;
-            -webkit-app-region: no-drag;
+            -webkit-app-region: drag;
         }
         .icon-container:hover {
             transform: scale(1.1);
-        }
-        .icon-container:active {
-            transform: scale(0.95);
         }
         img {
             width: 100%;
             height: 100%;
             pointer-events: none;
             transition: opacity 0.1s ease;
+            -webkit-app-region: no-drag;
         }
         .mascot-img {
             position: absolute;
@@ -48,20 +40,31 @@
         .mascot-img.active {
             opacity: 1;
         }
+        .click-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            -webkit-app-region: no-drag;
+            cursor: pointer;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
-    <div class="drag-area"></div>
-    <div class="icon-container" id="iconBtn">
+    <div class="icon-container">
         <img src="Ifen_logo_masc_1.png" alt="Mascot" class="mascot-img active" id="img1">
         <img src="Ifen_logo_masc_2.png" alt="Mascot" class="mascot-img" id="img2">
         <img src="Ifen_logo_masc_3.png" alt="Mascot" class="mascot-img" id="img3">
+        <div class="click-area" id="clickArea"></div>
     </div>
     <script>
         const { ipcRenderer } = require('electron');
         
-        // Click handler
-        document.getElementById('iconBtn').addEventListener('click', () => {
+        // Click handler on the click area
+        document.getElementById('clickArea').addEventListener('click', (e) => {
+            e.stopPropagation();
             console.log('Icon clicked!');
             ipcRenderer.send('open-chat');
         });
@@ -81,17 +84,17 @@
             const randomDelay = 2000 + Math.random() * 3000;
 
             setTimeout(() => {
-                // Show img2 (waving) for 300ms
+                // Show img2 (waving) for 600ms (doubled)
                 img1.classList.remove('active');
                 img2.classList.add('active');
 
                 setTimeout(() => {
-                    // Show img3 (full wave) for 500ms
+                    // Show img3 (full wave) for 1000ms (doubled)
                     img2.classList.remove('active');
                     img3.classList.add('active');
 
                     setTimeout(() => {
-                        // Back to img2 briefly (150ms)
+                        // Back to img2 briefly (300ms, doubled)
                         img3.classList.remove('active');
                         img2.classList.add('active');
 
@@ -102,9 +105,9 @@
 
                             // Repeat the animation
                             setTimeout(animate, 1000);
-                        }, 150);
-                    }, 500);
-                }, 300);
+                        }, 300);
+                    }, 1000);
+                }, 600);
             }, randomDelay);
         }
 
