@@ -50,9 +50,15 @@ function startServer() {
 }
 
 function createFloatingIcon() {
+    const { screen } = require('electron');
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const { width, height } = primaryDisplay.workAreaSize;
+
     floatingIcon = new BrowserWindow({
         width: 100,
         height: 100,
+        x: width - 120, // Position 20px from right edge
+        y: height - 120, // Position 20px from bottom
         transparent: true,
         frame: false,
         alwaysOnTop: true,
