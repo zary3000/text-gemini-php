@@ -66,7 +66,6 @@ function createWindow() {
         frame: true,
         resizable: true,
         alwaysOnTop: true,
-        skipTaskbar: true, // Hide from taskbar
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true
@@ -90,7 +89,13 @@ function createWindow() {
 }
 
 function createTray() {
-    tray = new Tray(path.join(__dirname, 'ifen_logo_1.png'));
+    // Try to use .ico file first (better for Windows), fallback to .png
+    let iconPath = path.join(__dirname, 'ifen_logo_1.ico');
+    if (!require('fs').existsSync(iconPath)) {
+        iconPath = path.join(__dirname, 'ifen_logo_1.png');
+    }
+    
+    tray = new Tray(iconPath);
     
     const contextMenu = Menu.buildFromTemplate([
         {
