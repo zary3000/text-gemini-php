@@ -84,28 +84,22 @@
             const randomDelay = 2000 + Math.random() * 3000;
 
             setTimeout(() => {
-                // Show img2 (waving) for 600ms (doubled)
+                // Show img2 (waving) for 600ms
                 img1.classList.remove('active');
                 img2.classList.add('active');
 
                 setTimeout(() => {
-                    // Show img3 (full wave) for 1000ms (doubled)
+                    // Show img3 (full wave) for 1000ms
                     img2.classList.remove('active');
                     img3.classList.add('active');
 
                     setTimeout(() => {
-                        // Back to img2 briefly (300ms, doubled)
+                        // Back to img1 (standard) directly
                         img3.classList.remove('active');
-                        img2.classList.add('active');
+                        img1.classList.add('active');
 
-                        setTimeout(() => {
-                            // Back to img1 (standard)
-                            img2.classList.remove('active');
-                            img1.classList.add('active');
-
-                            // Repeat the animation
-                            setTimeout(animate, 1000);
-                        }, 300);
+                        // Repeat the animation
+                        setTimeout(animate, 1000);
                     }, 1000);
                 }, 600);
             }, randomDelay);
