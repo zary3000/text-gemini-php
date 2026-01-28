@@ -74,35 +74,42 @@
         const img2 = document.getElementById('img2');
         const img3 = document.getElementById('img3');
 
+        // ==========================================
+        // ANIMATION TIMING SETTINGS (in milliseconds)
+        // ==========================================
+        const DELAY_BEFORE_WAVE = 2000 + Math.random() * 3000; // Random 2-5 seconds idle time
+        const DURATION_IMG2 = 600;  // How long image 2 (waving) shows
+        const DURATION_IMG3 = 1000; // How long image 3 (full wave) shows
+        const PAUSE_AFTER_WAVE = 1000; // Pause before next animation cycle
+        // ==========================================
+
         function animate() {
             // Start with img1 (standard pose)
             img1.classList.add('active');
             img2.classList.remove('active');
             img3.classList.remove('active');
 
-            // Random delay before animation (2-5 seconds)
-            const randomDelay = 2000 + Math.random() * 3000;
-
+            // Wait random delay before starting wave animation
             setTimeout(() => {
-                // Show img2 (waving) for 600ms
+                // Show img2 (waving)
                 img1.classList.remove('active');
                 img2.classList.add('active');
 
                 setTimeout(() => {
-                    // Show img3 (full wave) for 1000ms
+                    // Show img3 (full wave)
                     img2.classList.remove('active');
                     img3.classList.add('active');
 
                     setTimeout(() => {
-                        // Back to img1 (standard) directly
+                        // Return directly to img1 (standard)
                         img3.classList.remove('active');
                         img1.classList.add('active');
 
-                        // Repeat the animation
-                        setTimeout(animate, 1000);
-                    }, 1000);
-                }, 600);
-            }, randomDelay);
+                        // Wait before repeating the animation cycle
+                        setTimeout(animate, PAUSE_AFTER_WAVE);
+                    }, DURATION_IMG3);
+                }, DURATION_IMG2);
+            }, DELAY_BEFORE_WAVE);
         }
 
         // Start animation
