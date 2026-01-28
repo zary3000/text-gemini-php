@@ -66,6 +66,7 @@ function createWindow() {
         frame: true,
         resizable: true,
         alwaysOnTop: true,
+        skipTaskbar: true, // Hide from taskbar
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true
