@@ -1,9 +1,9 @@
-const { app, BrowserWindow, Tray, Menu } = require('electron');
+const { app, BrowserWindow } = require('electron');
 const express = require('express');
 const path = require('path');
 
-let tray = null;
-let mainWindow = null;
+let floatingIcon = null;
+let chatWindow = null;
 let phpServer = null;
 
 // Start Express server to serve PHP files
@@ -49,20 +49,98 @@ function startServer() {
     });
 }
 
-function createWindow() {
+function createFloatingIcon() {
+    floatingIcon = new BrowserWindow({
+        width: 80,
+        height: 80,
+        transparent: true,
+        frame: false,
+        alwaysOnTop: true,
+        skipTaskbar: true,
+        resizable: false,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        }
+    });
+
+    // Create HTML content for the floating icon
+    const iconHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                -webkit-app-region: drag;
+                background: transparent;
+                cursor: move;
+            }
+            .icon-container {
+                width: 80px;
+                height: 80px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 50%;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                transition: transform 0.2s, box-shadow 0.2s;
+                cursor: pointer;
+            }
+            .icon-container:hover {
+                transform: scale(1.1);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            }
+            .icon-container:active {
+                transform: scale(0.95);
+            }
+            img {
+                width: 60px;
+                height: 60px;
+                pointer-events: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="icon-container" onclick="openChat()">
+            <img src="ifen_logo_1.png" alt="Gemini Chat">
+        </div>
+        <script>
+            const { ipcRenderer } = require('electron');
+            function openChat() {
+                ipcRenderer.send('open-chat');
+            }
+        </script>
+    </body>
+    </html>
+    `;
+
+    floatingIcon.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(iconHTML)}`);
+    
+    floatingIcon.setIgnoreMouseEvents(false);
+}
+
+function createChatWindow() {
     // Don't create a new window if one already exists
-    if (mainWindow) {
-        if (mainWindow.isMinimized()) mainWindow.restore();
-        mainWindow.show();
-        mainWindow.focus();
+    if (chatWindow) {
+        if (chatWindow.isMinimized()) chatWindow.restore();
+        chatWindow.show();
+        chatWindow.focus();
         return;
     }
 
-    mainWindow = new BrowserWindow({
+    const { screen } = require('electron');
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const { width, height } = primaryDisplay.workAreaSize;
+
+    chatWindow = new BrowserWindow({
         width: 400,
         height: 600,
-        x: 100, // Position from right edge
-        y: 100, // Position from top
+        x: width - 420, // Position 20px from right edge
+        y: 20, // Position 20px from top
         frame: true,
         resizable: true,
         alwaysOnTop: true,
@@ -73,76 +151,36 @@ function createWindow() {
         icon: path.join(__dirname, 'ifen_logo_1.png')
     });
 
-    mainWindow.loadURL('http://localhost:8000/gemini-chat.html');
+    chatWindow.loadURL('http://localhost:8000/gemini-chat.html');
 
-    // Handle window close - hide instead of destroy
-    mainWindow.on('close', (event) => {
-        if (!app.isQuitting) {
-            event.preventDefault();
-            mainWindow.hide();
-        }
-    });
-
-    mainWindow.on('closed', () => {
-        mainWindow = null;
-    });
-}
-
-function createTray() {
-    // Try to use .ico file first (better for Windows), fallback to .png
-    let iconPath = path.join(__dirname, 'ifen_logo_1.ico');
-    if (!require('fs').existsSync(iconPath)) {
-        iconPath = path.join(__dirname, 'ifen_logo_1.png');
-    }
-    
-    tray = new Tray(iconPath);
-    
-    const contextMenu = Menu.buildFromTemplate([
-        {
-            label: 'Open Chat',
-            click: () => {
-                createWindow();
-            }
-        },
-        {
-            label: 'Quit',
-            click: () => {
-                app.isQuitting = true;
-                app.quit();
-            }
-        }
-    ]);
-
-    tray.setToolTip('Gemini Chat');
-    tray.setContextMenu(contextMenu);
-
-    // Click tray icon to toggle window
-    tray.on('click', () => {
-        if (mainWindow && mainWindow.isVisible()) {
-            mainWindow.hide();
-        } else {
-            createWindow();
-        }
+    // Handle window close
+    chatWindow.on('close', () => {
+        chatWindow = null;
     });
 }
 
 // Start server when app is ready
 app.whenReady().then(() => {
     startServer();
-    createTray();
-    createWindow();
+    createFloatingIcon();
+
+    // Listen for open-chat event from floating icon
+    const { ipcMain } = require('electron');
+    ipcMain.on('open-chat', () => {
+        createChatWindow();
+    });
 
     app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
+        if (!floatingIcon) {
+            createFloatingIcon();
         }
     });
 });
 
-// Quit when all windows are closed (except on macOS)
+// Quit when floating icon is closed
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
-        // Don't quit, just hide to tray
+        app.quit();
     }
 });
 
