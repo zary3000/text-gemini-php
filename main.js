@@ -55,10 +55,10 @@ function createFloatingIcon() {
     const { width, height } = primaryDisplay.workAreaSize;
 
     floatingIcon = new BrowserWindow({
-        width: 100,
-        height: 100,
-        x: width - 120, // Position 20px from right edge
-        y: height - 120, // Position 20px from bottom
+        width: 50,
+        height: 50,
+        x: width - 70, // Position 20px from right edge
+        y: height - 70, // Position 20px from bottom
         transparent: true,
         frame: false,
         alwaysOnTop: true,
