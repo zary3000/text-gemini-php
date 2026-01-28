@@ -64,61 +64,9 @@ function createFloatingIcon() {
         }
     });
 
-    // Create HTML content for the floating icon
-    const iconHTML = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            body {
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
-                -webkit-app-region: drag;
-                background: transparent;
-                cursor: move;
-            }
-            .icon-container {
-                width: 80px;
-                height: 80px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: rgba(255, 255, 255, 0.95);
-                border-radius: 50%;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-                transition: transform 0.2s, box-shadow 0.2s;
-                cursor: pointer;
-            }
-            .icon-container:hover {
-                transform: scale(1.1);
-                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-            }
-            .icon-container:active {
-                transform: scale(0.95);
-            }
-            img {
-                width: 60px;
-                height: 60px;
-                pointer-events: none;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="icon-container" onclick="openChat()">
-            <img src="ifen_logo_1.png" alt="Gemini Chat">
-        </div>
-        <script>
-            const { ipcRenderer } = require('electron');
-            function openChat() {
-                ipcRenderer.send('open-chat');
-            }
-        </script>
-    </body>
-    </html>
-    `;
-
-    floatingIcon.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(iconHTML)}`);
+    // Load the HTML file from disk instead of inline
+    const iconHTMLPath = path.join(__dirname, 'floating-icon.html');
+    floatingIcon.loadFile(iconHTMLPath);
     
     floatingIcon.setIgnoreMouseEvents(false);
 }
