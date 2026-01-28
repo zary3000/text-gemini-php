@@ -54,11 +54,15 @@ function createFloatingIcon() {
     const primaryDisplay = screen.getPrimaryDisplay();
     const { width, height } = primaryDisplay.workAreaSize;
 
+    // POSITION SETTINGS - Adjust these values to change icon position
+    const iconRightOffset = 70;  // Distance from right edge (decrease to move right, increase to move left)
+    const iconBottomOffset = 70; // Distance from bottom edge (decrease to move down, increase to move up)
+
     floatingIcon = new BrowserWindow({
         width: 50,
         height: 50,
-        x: width - 70, // Position 20px from right edge
-        y: height - 70, // Position 20px from bottom
+        x: width - iconRightOffset,   // Horizontal position
+        y: height - iconBottomOffset, // Vertical position
         transparent: true,
         frame: false,
         alwaysOnTop: true,
@@ -78,7 +82,14 @@ function createFloatingIcon() {
 }
 
 function createChatWindow() {
-    // Don't create a new window if one already exists
+    // If chat window exists and is visible, close it (toggle off)
+    if (chatWindow && chatWindow.isVisible()) {
+        chatWindow.close();
+        chatWindow = null;
+        return;
+    }
+
+    // If chat window exists but is hidden, show it
     if (chatWindow) {
         if (chatWindow.isMinimized()) chatWindow.restore();
         chatWindow.show();
