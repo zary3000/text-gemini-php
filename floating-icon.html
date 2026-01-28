@@ -17,45 +17,99 @@
             -webkit-app-region: drag;
         }
         .icon-container {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 50%;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: transparent;
             cursor: pointer;
             position: relative;
             -webkit-app-region: no-drag;
         }
         .icon-container:hover {
             transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
         .icon-container:active {
             transform: scale(0.95);
         }
         img {
-            width: 60px;
-            height: 60px;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
+            transition: opacity 0.1s ease;
+        }
+        .mascot-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+        }
+        .mascot-img.active {
+            opacity: 1;
         }
     </style>
 </head>
 <body>
     <div class="drag-area"></div>
     <div class="icon-container" id="iconBtn">
-        <img src="ifen_logo_1.png" alt="Gemini Chat">
+        <img src="Ifen_logo_masc_1.png" alt="Mascot" class="mascot-img active" id="img1">
+        <img src="Ifen_logo_masc_2.png" alt="Mascot" class="mascot-img" id="img2">
+        <img src="Ifen_logo_masc_3.png" alt="Mascot" class="mascot-img" id="img3">
     </div>
     <script>
         const { ipcRenderer } = require('electron');
         
+        // Click handler
         document.getElementById('iconBtn').addEventListener('click', () => {
             console.log('Icon clicked!');
             ipcRenderer.send('open-chat');
         });
+
+        // Animation logic
+        const img1 = document.getElementById('img1');
+        const img2 = document.getElementById('img2');
+        const img3 = document.getElementById('img3');
+
+        function animate() {
+            // Start with img1 (standard pose)
+            img1.classList.add('active');
+            img2.classList.remove('active');
+            img3.classList.remove('active');
+
+            // Random delay before animation (2-5 seconds)
+            const randomDelay = 2000 + Math.random() * 3000;
+
+            setTimeout(() => {
+                // Show img2 (waving) for 300ms
+                img1.classList.remove('active');
+                img2.classList.add('active');
+
+                setTimeout(() => {
+                    // Show img3 (full wave) for 500ms
+                    img2.classList.remove('active');
+                    img3.classList.add('active');
+
+                    setTimeout(() => {
+                        // Back to img2 briefly (150ms)
+                        img3.classList.remove('active');
+                        img2.classList.add('active');
+
+                        setTimeout(() => {
+                            // Back to img1 (standard)
+                            img2.classList.remove('active');
+                            img1.classList.add('active');
+
+                            // Repeat the animation
+                            setTimeout(animate, 1000);
+                        }, 150);
+                    }, 500);
+                }, 300);
+            }, randomDelay);
+        }
+
+        // Start animation
+        animate();
     </script>
 </body>
 </html>
