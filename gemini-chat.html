@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Support Chat</title>
+    <title>Jimmini Chat</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a3e;
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -33,7 +33,7 @@
         }
 
         .chat-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2b2d5a;
             color: white;
             padding: 20px;
             text-align: center;
@@ -71,7 +71,7 @@
         }
 
         .message.user .message-content {
-            background: #667eea;
+            background: #2b2d5a;
             color: white;
             border-bottom-right-radius: 4px;
         }
@@ -109,12 +109,12 @@
         }
 
         #userInput:focus {
-            border-color: #667eea;
+            border-color: #2b2d5a;
         }
 
         #sendBtn {
             padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2b2d5a;
             color: white;
             border: none;
             border-radius: 25px;
@@ -126,7 +126,8 @@
 
         #sendBtn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(43, 45, 90, 0.6);
+            background: #3a3d6e;
         }
 
         #sendBtn:disabled {
