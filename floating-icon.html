@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: transparent;
+        }
+        .drag-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            -webkit-app-region: drag;
+        }
+        .icon-container {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            position: relative;
+            -webkit-app-region: no-drag;
+        }
+        .icon-container:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+        .icon-container:active {
+            transform: scale(0.95);
+        }
+        img {
+            width: 60px;
+            height: 60px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="drag-area"></div>
+    <div class="icon-container" id="iconBtn">
+        <img src="ifen_logo_1.png" alt="Gemini Chat">
+    </div>
+    <script>
+        const { ipcRenderer } = require('electron');
+        
+        document.getElementById('iconBtn').addEventListener('click', () => {
+            console.log('Icon clicked!');
+            ipcRenderer.send('open-chat');
+        });
+    </script>
+</body>
+</html>
