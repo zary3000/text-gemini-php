@@ -59,8 +59,8 @@ function createFloatingIcon() {
     const iconBottomOffset = 125; // Distance from bottom edge (decrease to move down, increase to move up)
 
     floatingIcon = new BrowserWindow({
-        width: 70,
-        height: 70,
+        width: 75,
+        height: 75,
         x: width - iconRightOffset,   // Horizontal position
         y: height - iconBottomOffset, // Vertical position
         transparent: true,
