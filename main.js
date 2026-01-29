@@ -56,7 +56,7 @@ function createFloatingIcon() {
 
     // POSITION SETTINGS - Adjust these values to change icon position
     const iconRightOffset = 200;  // Distance from right edge (decrease to move right, increase to move left)
-    const iconBottomOffset = 200; // Distance from bottom edge (decrease to move down, increase to move up)
+    const iconBottomOffset = 125; // Distance from bottom edge (decrease to move down, increase to move up)
 
     floatingIcon = new BrowserWindow({
         width: 70,
@@ -103,7 +103,7 @@ function createChatWindow() {
 
     chatWindow = new BrowserWindow({
         width: 450,
-        height: 600, // Increased from 600 to give more space for input area
+        height: 700, // Increased from 600 to give more space for input area
         x: width - 460, // Position from right edge
         y: 20, // Position 20px from top
         frame: true,
