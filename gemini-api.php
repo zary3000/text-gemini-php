@@ -1,111 +1,304 @@
-<?php
-/**
- * Gemini API Backend
- * Handles requests from the HTML chat interface
- */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jimmini Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('Backgrounds_soutien.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-// Set headers for JSON response
-header('Content-Type: application/json');
+        .chat-container {
+            width: 90%;
+            max-width: 800px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-// Configuration
-$apiKey = 'YOUR_API_KEY_HERE'; // Replace with your API key
-$model = 'gemini-2.5-flash';
+        .chat-header {
+            background: #5a4d7a;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
 
-// Get the JSON input from the request
-$input = file_get_contents('php://input');
-$data = json_decode($input, true);
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: linear-gradient(180deg, #fafafa 0%, #f0f0f0 100%);
+        }
 
-// Validate input
-if (!isset($data['message']) || empty(trim($data['message']))) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'No message provided'
-    ]);
-    exit;
-}
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
 
-$question = trim($data['message']);
+        .message.user {
+            align-items: flex-end;
+        }
 
-// API endpoint
-$url = "https://generativelanguage.googleapis.com/v1/models/{$model}:generateContent?key={$apiKey}";
+        .message.gemini {
+            align-items: flex-start;
+        }
 
-// Prepare the request payload
-$payload = [
-    'contents' => [
-        [
-            'parts' => [
-                ['text' => $question]
-            ]
-        ]
-    ]
-];
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
 
-// Initialize cURL
-$ch = curl_init($url);
+        .message.user .message-content {
+            background: #5a4d7a;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
 
-// Set cURL options
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'Content-Type: application/json'
-]);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        .message.gemini .message-content {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
 
-// Execute the request
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        .message-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
 
-// Check for cURL errors
-if (curl_errno($ch)) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'cURL Error: ' . curl_error($ch)
-    ]);
-    exit;
-}
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+        }
 
-// Check HTTP response code
-if ($httpCode !== 200) {
-    $errorData = json_decode($response, true);
-    $errorMessage = isset($errorData['error']['message']) 
-        ? $errorData['error']['message'] 
-        : 'Unknown API error';
-    
-    echo json_encode([
-        'success' => false,
-        'error' => "API Error (HTTP {$httpCode}): {$errorMessage}"
-    ]);
-    exit;
-}
+        #userInput {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
 
-// Parse the response
-$responseData = json_decode($response, true);
+        #userInput:focus {
+            border-color: #5a4d7a;
+        }
 
-if (json_last_error() !== JSON_ERROR_NONE) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'JSON Parse Error: ' . json_last_error_msg()
-    ]);
-    exit;
-}
+        #sendBtn {
+            padding: 12px 30px;
+            background: #5a4d7a;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
 
-// Extract and return the text response
-if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
-    $answer = $responseData['candidates'][0]['content']['parts'][0]['text'];
-    
-    echo json_encode([
-        'success' => true,
-        'response' => $answer
-    ]);
-} else {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Unexpected response structure from Gemini API'
-    ]);
-}
-?>
+        #sendBtn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(90, 77, 122, 0.6);
+            background: #6f5e94;
+        }
+
+        #sendBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        /* Scrollbar styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            💬 Jimmini Chat
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message gemini">
+                <span class="message-label">Jimmini</span>
+                <div class="message-content">
+                    Hello! I'm Jimmini. Ask me anything!
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loadingIndicator">
+            Jimmini is thinking...
+        </div>
+        
+        <div class="chat-input-container">
+            <input 
+                type="text" 
+                id="userInput" 
+                placeholder="Type your message here..." 
+                autocomplete="off"
+            >
+            <button id="sendBtn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        // Store conversation history
+        let conversationHistory = [];
+
+        // Send message when button is clicked
+        sendBtn.addEventListener('click', sendMessage);
+
+        // Send message when Enter is pressed
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            
+            if (message === '') return;
+
+            // Add user message to chat
+            addMessage('user', message);
+            
+            // Add user message to conversation history
+            conversationHistory.push({
+                role: 'user',
+                text: message
+            });
+            
+            // Clear input
+            userInput.value = '';
+            
+            // Disable input while processing
+            userInput.disabled = true;
+            sendBtn.disabled = true;
+            loadingIndicator.classList.add('active');
+
+            try {
+                // Send request to PHP backend with full conversation history
+                const response = await fetch('gemini-api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        message: message,
+                        history: conversationHistory 
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    addMessage('gemini', data.response);
+                    
+                    // Add Gemini's response to conversation history
+                    conversationHistory.push({
+                        role: 'model',
+                        text: data.response
+                    });
+                } else {
+                    addMessage('gemini', '❌ Error: ' + data.error);
+                }
+            } catch (error) {
+                addMessage('gemini', '❌ Connection error: ' + error.message);
+            }
+
+            // Re-enable input
+            userInput.disabled = false;
+            sendBtn.disabled = false;
+            loadingIndicator.classList.remove('active');
+            userInput.focus();
+        }
+
+        function addMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const label = document.createElement('span');
+            label.className = 'message-label';
+            label.textContent = sender === 'user' ? 'You' : 'Jimmini';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.textContent = text;
+            
+            messageDiv.appendChild(label);
+            messageDiv.appendChild(content);
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Focus input on load
+        userInput.focus();
+    </script>
+</body>
+</html>
