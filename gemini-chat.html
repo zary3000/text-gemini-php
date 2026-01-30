@@ -205,9 +205,6 @@
         const sendBtn = document.getElementById('sendBtn');
         const loadingIndicator = document.getElementById('loadingIndicator');
 
-        // Store conversation history
-        let conversationHistory = [];
-
         // Send message when button is clicked
         sendBtn.addEventListener('click', sendMessage);
 
@@ -226,12 +223,6 @@
             // Add user message to chat
             addMessage('user', message);
             
-            // Add user message to conversation history
-            conversationHistory.push({
-                role: 'user',
-                text: message
-            });
-            
             // Clear input
             userInput.value = '';
             
@@ -241,28 +232,19 @@
             loadingIndicator.classList.add('active');
 
             try {
-                // Send request to PHP backend with full conversation history
+                // Send request to PHP backend (history is managed server-side)
                 const response = await fetch('gemini-api.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ 
-                        message: message,
-                        history: conversationHistory 
-                    })
+                    body: JSON.stringify({ message: message })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
                     addMessage('gemini', data.response);
-                    
-                    // Add Gemini's response to conversation history
-                    conversationHistory.push({
-                        role: 'model',
-                        text: data.response
-                    });
                 } else {
                     addMessage('gemini', '❌ Error: ' + data.error);
                 }
