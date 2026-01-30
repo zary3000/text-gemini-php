@@ -77,43 +77,40 @@
         // ==========================================
         // ANIMATION TIMING SETTINGS (in milliseconds)
         // ==========================================
-        const DELAY_BEFORE_WAVE = 2000 + Math.random() * 3000; // Random 2-5 seconds idle time
         const DURATION_IMG2 = 900;  // How long image 2 (waving) shows
         const DURATION_IMG3 = 1300; // How long image 3 (full wave) shows
-        const PAUSE_AFTER_WAVE = 1000; // Pause before next animation cycle
         // ==========================================
 
-        function animate() {
-            // Start with img1 (standard pose)
-            img1.classList.add('active');
-            img2.classList.remove('active');
-            img3.classList.remove('active');
+        let isAnimating = false;
 
-            // Wait random delay before starting wave animation
+        function playWaveAnimation() {
+            // Don't start new animation if one is already playing
+            if (isAnimating) return;
+            
+            isAnimating = true;
+
+            // Show img2 (waving)
+            img1.classList.remove('active');
+            img2.classList.add('active');
+
             setTimeout(() => {
-                // Show img2 (waving)
-                img1.classList.remove('active');
-                img2.classList.add('active');
+                // Show img3 (full wave)
+                img2.classList.remove('active');
+                img3.classList.add('active');
 
                 setTimeout(() => {
-                    // Show img3 (full wave)
-                    img2.classList.remove('active');
-                    img3.classList.add('active');
-
-                    setTimeout(() => {
-                        // Return directly to img1 (standard)
-                        img3.classList.remove('active');
-                        img1.classList.add('active');
-
-                        // Wait before repeating the animation cycle
-                        setTimeout(animate, PAUSE_AFTER_WAVE);
-                    }, DURATION_IMG3);
-                }, DURATION_IMG2);
-            }, DELAY_BEFORE_WAVE);
+                    // Return directly to img1 (standard)
+                    img3.classList.remove('active');
+                    img1.classList.add('active');
+                    
+                    isAnimating = false;
+                }, DURATION_IMG3);
+            }, DURATION_IMG2);
         }
 
-        // Start animation
-        animate();
+        // Trigger animation on hover
+        const iconContainer = document.querySelector('.icon-container');
+        iconContainer.addEventListener('mouseenter', playWaveAnimation);
     </script>
 </body>
 </html>
